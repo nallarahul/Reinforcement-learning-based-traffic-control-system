@@ -1,141 +1,123 @@
-# Dynamic-Traffic-light-management-system
-This repository contains files for the traffic light management system using Reinforcement Learning.
+# Reinforcement-learning-based-traffic-control-system
 
-## Basic Idea 
-
-![sample](documentation/samplecity1.PNG)
-
-Suppose we have a city grid as shown above with 4 traffic light nodes.<br/>
-n1, n2, n3, and n4
-
-So, our model makes 4 decisions (one for each node) for which side to select for the green signal<br/>
-
-we have to select a minimum time (for ex 30s) that our model can not select a green light time below that limit.
-
-Our task is to minimize the amount of time vehicles have to wait on the traffic signal.<br/>
-The amount of waiting time for a given traffic signal is equal to the total car present on the signal x number of seconds.<br/>
-Each traffic signal will have 4 waiting time counter for each side of the road. So based on that our model will<br/>
-decide which side to select for the green signal.
-
-![train](documentation/train_loop.png)
-
-## Basic training process.
-
-We have trained our model on a number of events.<br/>
-Event is defined as a fixed motion where vehicles will pass through nodes in a fixed (pseudo-random manner).<br/>
-The reason for keeping the event fixed is that using a random event every time will give a random result.<br/>
-we will use many such fixed events to train our model so our model can handle different situations.
-
-The only input our model will receive is the number of vehicles present on 4 sides of each traffic node.<br/>
-and our model will output 4 sides one for each node.
-
-The number of nodes depends on the size of the grid.
-
-## SUMO for siumlation
-
-We used SUMO open-source software to make maps and generate simulations to train our model.
-
-Here are examples of some of the maps used to train the model.
-
-### Map1 
-![map1](maps_images/city2.JPG)
-
-### Map2
-![map2](maps_images/city3.JPG)
-
-### Map 3
-![map3](maps_images/citymap.JPG)
-
-###  Epoch Vs Time for Map1
-
-![evst](plots/time_vs_epoch_city1.png)
-
-### Epoch Vs Time for Map2
-![evst2](plots/time_vs_epoch_city3.png)
-
-### Epoch Vs Time for Map3
-![evst3](plots/time_vs_epoch_model.png)
-
-## Simulation of Trained Model.
+<p align = "center">
+    <img src = https://github.com/nallarahul/intelligent-traffic-control-system/blob/main/assets/Simulation.gif?raw=true width="50%">
+</p>
 
 
+This project presents an advanced traffic management system that leverages **Reinforcement Learning (RL)** to dynamically optimize traffic signal timings. By creating a smart, adaptive agent, this system can significantly reduce vehicle congestion and average wait times compared to traditional fixed-time traffic controllers. The entire environment is simulated using **SUMO (Simulation of Urban MObility)**.
 
-https://user-images.githubusercontent.com/44360315/113673665-e8edd300-96d6-11eb-8fbe-d09e078fbfbe.mp4
+---
 
+## The Core Idea
 
+The goal is to move beyond rigid, pre-programmed traffic lights and create a system that can **perceive** its environment and make **intelligent decisions** in real-time.
+Our RL agent observes the state of the traffic network at each intersection—specifically, the number of cars waiting in each direction. Based on this input, it learns an optimal policy to decide which lane gets the green light next. The primary objective is to minimize the cumulative wait time for all vehicles in the simulation.
 
-## Arduino connection.
+### How it Learns
+The agent is trained through thousands of simulated traffic scenarios. It learns by trial and error, associating its actions (changing the lights) with outcomes (changes in traffic flow). Positive outcomes (reduced congestion) are rewarded, reinforcing the agent's decision-making process.
 
-We have connected our simulation with Arduino.<br/>
+![A flowchart showing the training loop of the reinforcement learning model.](assets/train_loop.png)
 
-### Arduino1
-<img src="arduino_images/arduino1.jpg" width="600" height="400"/>
+---
 
-### Arduino2
-<img src="arduino_images/arduino2.jpg" width="600" height="400"/>
+## Technology Stack
 
-### Arduino3
-<img src="arduino_images/arduino3.jpg" width="600" height="400"/>
+* **Simulation:** [SUMO (Simulation of Urban MObility)](https://sumo.dlr.de/docs/index.html)
+* **Machine Learning:** Python, TensorFlow, Keras
+* **Core Libraries:** NumPy, Traci
 
-## How to train new Networks.
+---
+## Performance and Results
 
-First Download or clone the repository.<br/>
-Then pip install requirements.txt using
+The effectiveness of the Reinforcement Learning model is demonstrated by its ability to reduce the total vehicle waiting time as it gains more experience over training epochs. The graphs below clearly show a downward trend in wait times across the different training environments.
 
-`pip install -r requirements.txt`
+| DQN                                                                                                        | D3QN                                                                                                        | DDQN                                                                                                    |
+| :-----------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------: |
+| ![A graph showing the covergence of waiting time with number of epochs for DQN](plots/time_vs_epoch_model_city.png) | ![A graph showing the covergence of waiting time with number of epochs for DDQN](plots/time_vs_epoch_model_city1_ddqn.png) | ![A graph showing the covergence of waiting time with number of epochs for D3QN](plots/time_vs_epoch_model_city1_d3qn.png) |
 
-you need to download SUMO GUI for running simulations.
+---
 
-download sumo gui from [here](https://sumo.dlr.de/docs/Downloads.php)
+## How to Use This Project
 
-### Step1: create network and route file
+Follow these steps to set up and run the simulation on your own machine.
 
-Use SUMO netedit tool to create a network<br/>
-for example 'network.net.xml' and save it in the maps folder.
+### Prerequisites
 
-cd into maps folder and run the following command
+1.  **Install Python:** Ensure you have Python 3.8 or newer installed.
+2.  **Install SUMO:** Download and install the SUMO simulation suite from the [official website](https://sumo.dlr.de/docs/Downloads.php). Make sure to set the `SUMO_HOME` environment variable.
+3.  **Clone the Repository:**
+    ```bash
+    git clone <your-repository-url>
+    cd <your-repository-name>
+    ```
+4.  **Install Dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-`python randomTrips.py -n network.net.xml -r routes.rou.xml -e 500`
+---
 
-This will create a routes.rou.xml file for 500 simulation steps for the network "network.net.xml"
+### Running a Pre-trained Model
 
-### Step2: Set Configuration file.
+Each model in the `/models` folder is trained for a specific map in the `/maps` folder. To run a simulation, you must first configure the project to use the correct map.
 
-You need to provide network and route files to the Configuration file.<br/>
-change net-file and route-files in input.
+**Step 1: Configure the Map**
 
-`<input>`        
-  `<net-file value='maps/city1.net.xml'/>`
-  `<route-files value='maps/city1.rou.xml'/>`
-`</input>`
+Open the `configuration.sumocfg` file. This file tells SUMO which map and route files to load.
 
-### Step3: Train the model.
+**Step 2: Edit the File Paths**
 
-Now use the train.py file to train a model for this network.<br/>
+Modify the `net-file` and `route-files` values to point to the desired map. For example, to test the model trained on `city3.net.xml`, your configuration file should look like this:
 
-`python train.py --train -e 50 -m model_name -s 500`
+```xml
+<input>
+    <net-file value="maps/city3.net.xml"/>
+    <route-files value="maps/city3.rou.xml"/>
+</input>
+````
 
-This code will train the model for 50 epochs.<br/>
--e is to set the epochs.<br/>
--m for model_name which will be saved in the model folder.<br/>
--s tells simulation to run for 500 steps.<br/>
---train tells the train.py to train the model if not specified it will load model_name from the model's folder.
+**Step 3: Run the Simulation Command**
 
-At the end of the simulation, it will show time_vs_epoch graphs and save them to plots folder with name time_vs_epoch_{model_name}.png
+Execute the `train.py` script from your terminal, specifying the model you want to run.
 
-### Step4: Running trained model.
+```bash
+# Example for running the model trained on city3
+python train.py -m model_city3 -s 500
+```
 
-You can use train.py to run a pre-trained model on GUI.
+This will launch the SUMO GUI, where you can see the trained agent controlling the traffic lights in real-time.
 
-`python train.py -m model_name -s 500` 
+-----
 
-This will open GUI which you can run to see how your model performs.
-To get accurate results set a value of -s the same for testing and training.
+### Training a New Model
 
-### Extra: Running Ardunio
-Currently, Arduino works only for a single crossroad.<br/>
-More than one cross road will return an error.<br/>
+You can also train a new agent on a custom map.
 
-For running Arduino for testing use --ard.
+**Step 1: Create a New Network**
 
-`python train.py -m model_name -s 500 --ard`
+Use SUMO's **Netedit** tool to design your own road network. Save the network file in the `/maps` folder (e.g., `mynetwork.net.xml`).
+
+**Step 2: Generate Random Traffic**
+
+Navigate to the `/maps` directory in your terminal and use the `randomTrips.py` script to generate a route file for your new network.
+
+```bash
+cd maps
+python randomTrips.py -n mynetwork.net.xml -r myroutes.rou.xml -e 1000
+```
+
+**Step 3: Configure and Train**
+
+Update `configuration.sumocfg` to point to your new `mynetwork.net.xml` and `myroutes.rou.xml` files. Then, run the training command from the project's root directory:
+
+```bash
+# The --train flag enables training mode
+python train.py --train -m my_new_model -e 50 -s 1000
+```
+
+  * `-m my_new_model`: The name for your new model.
+  * `-e 50`: The number of training epochs.
+
+The script will save your trained model in the `/models` folder and generate a performance plot in the `/plots` folder.
+
